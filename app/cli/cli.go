@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/tigorlazuardi/ridit-go/app/cli/config"
 	"github.com/tigorlazuardi/ridit-go/pkg"
 )
 
@@ -25,11 +26,16 @@ func Exec() {
 
 func init() {
 	cobra.OnInitialize(initConfigurations)
+	rootCmd.AddCommand(config.ConfigCMD)
 }
 
 func initConfigurations() {
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors: os.Getenv("RIDIT_LOCAL_DEVELOPMENT") != "",
+		ForceColors:            os.Getenv("RIDIT_LOCAL_DEVELOPMENT") != "",
+		PadLevelText:           true,
+		DisableLevelTruncation: true,
+		FullTimestamp:          true,
+		TimestampFormat:        "Jan 02 15:04:05",
 	})
 	logrus.AddHook(&pkg.JSONHook{})
 }
