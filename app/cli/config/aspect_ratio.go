@@ -1,4 +1,4 @@
-package aspectratio
+package config
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Set = &cobra.Command{
+var aspectRatioCmd = &cobra.Command{
 	Use:   "aspect_ratio",
 	Short: "set aspect_ratio parameters",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -67,8 +67,9 @@ var setAspectRatioWidth = &cobra.Command{
 }
 
 func init() {
-	Set.AddCommand(enableAspectRatio)
-	Set.AddCommand(disableAspectRatio)
-	Set.AddCommand(setAspectRatioHeight)
-	Set.AddCommand(setAspectRatioWidth)
+	aspectRatioCmd.AddCommand(enableAspectRatio)
+	aspectRatioCmd.AddCommand(disableAspectRatio)
+	aspectRatioCmd.AddCommand(setAspectRatioHeight)
+	aspectRatioCmd.AddCommand(setAspectRatioWidth)
+	ConfigCMD.AddCommand(aspectRatioCmd)
 }

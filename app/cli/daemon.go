@@ -13,10 +13,10 @@ import (
 var daemonCMD = &cobra.Command{
 	Use:     "daemon",
 	Aliases: []string{"http", "serve"},
-	Short:   "runs ridit as daemon service in port 10101",
-	Long:    "runs ridit as daemon service in port 10101",
+	Short:   "runs ridit as daemon http service",
+	Long:    "runs ridit as daemon http service",
 	Run: func(cmd *cobra.Command, args []string) {
-
+		_ = cmd.Help()
 	},
 }
 

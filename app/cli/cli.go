@@ -27,6 +27,8 @@ func Exec() {
 func init() {
 	cobra.OnInitialize(initConfigurations)
 	rootCmd.AddCommand(config.ConfigCMD)
+	rootCmd.PersistentFlags().StringP("profile", "p", "main", "sets the profile to use")
+	rootCmd.PersistentFlags().CountP("verbose", "v", "set verbose level. Set once to print debug level, repeat to print everything")
 }
 
 func initConfigurations() {
