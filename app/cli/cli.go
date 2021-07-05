@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tigorlazuardi/ridit-go/app/cli/config"
+	"github.com/tigorlazuardi/ridit-go/app/cli/subreddit"
 	"github.com/tigorlazuardi/ridit-go/pkg"
 )
 
@@ -27,6 +28,7 @@ func Exec() {
 func init() {
 	cobra.OnInitialize(initConfigurations)
 	rootCmd.AddCommand(config.ConfigCMD)
+	rootCmd.AddCommand(subreddit.SubredditCMD)
 	rootCmd.PersistentFlags().StringP("profile", "p", "main", "sets the profile to use")
 	rootCmd.PersistentFlags().CountP("verbose", "v", "set verbose level. Set once to print debug level, repeat to print everything")
 }
