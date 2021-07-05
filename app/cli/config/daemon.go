@@ -31,7 +31,7 @@ var daemonPortConfig = &cobra.Command{
 			logrus.WithField("given_value", args[0]).Fatal("failed to parse value to positive integer value")
 		}
 		if val < 1 || val > 65535 {
-			logrus.Fatal("unsupported port value. Port must be a value between 1 - 65535. Port 1 - 1023 requires root/admin privilege.")
+			logrus.Fatal("unsupported port value. Port must be a value between 1 - 65535. Port 1 - 1023 requires root/admin privilege")
 		}
 		fmt.Println(val)
 	},

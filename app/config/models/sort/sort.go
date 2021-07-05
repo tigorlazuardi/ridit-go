@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-type Sort int
+type Sort string
 
 const (
-	New Sort = iota
-	Hot
-	Rising
-	Controversial
-	Top
+	New           Sort = "new"
+	Hot           Sort = "hot"
+	Rising        Sort = "rising"
+	Controversial Sort = "controversial"
+	Top           Sort = "top"
 )
 
 func Parse(s string) (Sort, error) {
@@ -53,7 +53,7 @@ func (s Sort) String() string {
 }
 
 func (s Sort) MarshalText() ([]byte, error) {
-	return []byte(s.String()), nil
+	return []byte("`" + s.String() + "`"), nil
 }
 
 func (s Sort) MarshalJSON() ([]byte, error) {
