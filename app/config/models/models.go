@@ -7,14 +7,13 @@ import (
 )
 
 type Config struct {
-	Download    Download    `db:"download" json:"download" toml:"download"`
-	AspectRatio AspectRatio `db:"aspect_ratio" json:"aspect_ratio" toml:"aspect_ratio"`
-	MinimumSize MinimumSize `db:"minimum_size" json:"minimum_size" toml:"minimum_size"`
-	Subreddits  []Subreddit `db:"subreddits" json:"subreddits" toml:"subreddits"`
+	Download    Download             `db:"download" json:"download" toml:"download"`
+	AspectRatio AspectRatio          `db:"aspect_ratio" json:"aspect_ratio" toml:"aspect_ratio"`
+	MinimumSize MinimumSize          `db:"minimum_size" json:"minimum_size" toml:"minimum_size"`
+	Subreddits  map[string]Subreddit `db:"subreddits" json:"subreddits" toml:"subreddits"`
 }
 
 type Subreddit struct {
-	Name string    `db:"name" json:"name" toml:"name"`
 	Sort sort.Sort `db:"sort" json:"sort" toml:"sort"`
 	Nsfw bool      `db:"nsfw" json:"nsfw" toml:"nsfw"`
 }
