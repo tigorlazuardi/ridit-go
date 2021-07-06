@@ -1,8 +1,6 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/tigorlazuardi/ridit-go/app/config"
@@ -20,7 +18,7 @@ var printConfigCMD = &cobra.Command{
 		} else if err != nil {
 			logrus.Fatal(err)
 		}
-		fmt.Println(string(val))
+		logrus.Println(string(val))
 	},
 }
 

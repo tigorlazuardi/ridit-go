@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -33,7 +32,7 @@ var enableMinimumSize = &cobra.Command{
 		if err != nil {
 			logrus.WithField("usage_example", cmd.Example).Fatal(err)
 		}
-		fmt.Println("enabled minimum_size check")
+		logrus.Println("enabled minimum_size check")
 	},
 }
 

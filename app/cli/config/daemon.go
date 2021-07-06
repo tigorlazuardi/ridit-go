@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -42,7 +41,7 @@ var daemonPortConfig = &cobra.Command{
 		if err != nil {
 			logrus.WithError(err).Fatal("failed to modify configuration")
 		}
-		fmt.Println("daemon port set to ", val)
+		logrus.Println("daemon port set to ", val)
 	},
 }
 
@@ -78,7 +77,7 @@ var daemonWallpaperInterval = &cobra.Command{
 				WithError(err).
 				Fatal("failed to modify configuration")
 		}
-		fmt.Println("wallpaper interval set to ", dur.String())
+		logrus.Println("wallpaper interval set to ", dur.String())
 	},
 }
 
@@ -93,7 +92,7 @@ var enableWallpaperChange = &cobra.Command{
 		if err != nil {
 			logrus.WithField("usage_example", cmd.Example).Fatal(err)
 		}
-		fmt.Println("enabled wallpaper change")
+		logrus.Println("enabled wallpaper change")
 	},
 }
 
@@ -108,7 +107,7 @@ var disableWallpaperChange = &cobra.Command{
 		if err != nil {
 			logrus.WithField("usage_example", cmd.Example).Fatal(err)
 		}
-		fmt.Println("disabled wallpaper change")
+		logrus.Println("disabled wallpaper change")
 	},
 }
 

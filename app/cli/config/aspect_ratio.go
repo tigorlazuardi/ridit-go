@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 
@@ -54,36 +53,48 @@ var disableAspectRatio = &cobra.Command{
 var setAspectRatioHeight = &cobra.Command{
 	Use:     "height",
 	Short:   "set height aspect ratio",
-	Example: "ridit config set aspect_ratio height 1080",
+	Example: "ridit config set aspect_ratio height 9",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			_ = cmd.Help()
 			return
 		}
+		entry := logrus.WithField("given_value", args[0]).WithField("example", cmd.Example)
 		val, err := strconv.ParseUint(args[0], 10, 64)
 		if err != nil {
-			logrus.WithField("given_value", args[0]).Fatal("failed to parse value to positive integer value")
+			entry.Fatal("failed to parse value to positive integer value")
 		}
-		fmt.Println(val)
-		// TODO: implement set aspect ratio
+		err = config.Modify(func(c *models.Config) {
+			c.AspectRatio.Height = uint(val)
+		})
+		if err != nil {
+			entry.Fatal(err)
+		}
+		logrus.Info("aspect ratio height set to", val)
 	},
 }
 
 var setAspectRatioWidth = &cobra.Command{
 	Use:     "width",
 	Short:   "set width aspect ratio",
-	Example: "ridit config set aspect_ratio width 1920",
+	Example: "ridit config set aspect_ratio width 16",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			_ = cmd.Help()
 			return
 		}
+		entry := logrus.WithField("given_value", args[0]).WithField("example", cmd.Example)
 		val, err := strconv.ParseUint(args[0], 10, 64)
 		if err != nil {
-			logrus.WithField("given_value", args[0]).Fatal("failed to parse value to positive integer value")
+			entry.Fatal("failed to parse value to positive integer value")
 		}
-		fmt.Println(val)
-		// TODO: implement set aspect ratio
+		err = config.Modify(func(c *models.Config) {
+			c.AspectRatio.Width = uint(val)
+		})
+		if err != nil {
+			entry.Fatal(err)
+		}
+		logrus.Info("aspect ratio width set to", val)
 	},
 }
 

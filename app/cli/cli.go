@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"os"
 	"path"
 
@@ -25,7 +24,7 @@ var rootCmd = &cobra.Command{
 			logrus.WithError(err).Fatal("failed to create config file")
 		}
 
-		fmt.Println(config.Download.Path)
+		logrus.Println(config.Download.Path)
 	},
 }
 
