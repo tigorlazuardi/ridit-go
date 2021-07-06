@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"context"
 	"os"
 	"path"
 
@@ -19,17 +20,20 @@ var rootCmd = &cobra.Command{
 	Short: "reddit image downloader",
 	Long:  "A CLI program to download images from reddit",
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := cmd.Context()
+		entry := pkg.EntryFromContext(ctx)
 		config, err := configapi.Load()
 		if err != nil {
-			logrus.WithError(err).Fatal("failed to create config file")
+			entry.WithError(err).Fatal("failed to create config file")
 		}
 
-		logrus.Println(config.Download.Path)
+		entry.Println(config.Download.Path)
 	},
 }
 
 func Exec() {
-	if err := rootCmd.Execute(); err != nil {
+	ctx := pkg.ContextWithNewEntry(context.Background())
+	if err := rootCmd.ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }

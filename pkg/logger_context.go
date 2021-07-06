@@ -3,6 +3,7 @@ package pkg
 import (
 	"context"
 
+	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -12,6 +13,11 @@ type entryKey struct{}
 
 var ContextEntryKey = entryKey{}
 
+func ContextWithNewEntry(ctx context.Context) context.Context {
+	entry := logrus.NewEntry(logrus.StandardLogger()).WithContext(ctx).WithField("transaction.id", uuid.NewV4().String())
+	return ContextWithEntry(ctx, entry)
+}
+
 func ContextWithEntry(ctx context.Context, entry *logrus.Entry) context.Context {
 	return context.WithValue(ctx, ContextEntryKey, entry)
 }
@@ -19,9 +25,9 @@ func ContextWithEntry(ctx context.Context, entry *logrus.Entry) context.Context 
 func EntryFromContext(ctx context.Context) *logrus.Entry {
 	entry, ok := ctx.Value(ContextEntryKey).(*logrus.Entry)
 	if !ok {
-		return logrus.NewEntry(logrus.StandardLogger())
+		return logrus.NewEntry(logrus.StandardLogger()).WithContext(ctx).WithField("transaction.id", uuid.NewV4().String())
 	}
-	return entry
+	return entry.WithContext(ctx)
 }
 
 func ContextEntryWithFields(ctx context.Context, fields logrus.Fields) context.Context {

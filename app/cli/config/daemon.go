@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tigorlazuardi/ridit-go/app/config"
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
+	"github.com/tigorlazuardi/ridit-go/pkg"
 )
 
 var daemonConfigCMD = &cobra.Command{
@@ -28,20 +29,22 @@ var daemonPortConfig = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
+		ctx := cmd.Context()
+		entry := pkg.EntryFromContext(ctx)
 		val, err := strconv.ParseUint(args[0], 10, 64)
 		if err != nil {
-			logrus.WithField("given_value", args[0]).Fatal("failed to parse value to positive integer value")
+			entry.WithField("given_value", args[0]).Fatal("failed to parse value to positive integer value")
 		}
 		if val < 1 || val > 65535 {
-			logrus.Fatal("unsupported port value. Port must be a value between 1 - 65535. Port 1 - 1023 requires root/admin privilege")
+			entry.Fatal("unsupported port value. Port must be a value between 1 - 65535. Port 1 - 1023 requires root/admin privilege")
 		}
 		err = config.Modify(func(c *models.Config) {
 			c.Daemon.Port = uint(val)
 		})
 		if err != nil {
-			logrus.WithError(err).Fatal("failed to modify configuration")
+			entry.WithError(err).Fatal("failed to modify configuration")
 		}
-		logrus.Println("daemon port set to ", val)
+		entry.Println("daemon port set to ", val)
 	},
 }
 
