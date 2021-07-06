@@ -1,10 +1,12 @@
 package models
 
+import confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
+
 type Listing struct {
 	Data Data `json:"data"`
 }
 
-func (l Listing) IntoDownloadMetas() []DownloadMeta {
+func (l Listing) IntoDownloadMetas(config confmodel.Config) []DownloadMeta {
 	result := []DownloadMeta{}
 	for _, children := range l.Data.Children {
 		data := children.Data

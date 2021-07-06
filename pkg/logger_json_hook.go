@@ -30,7 +30,7 @@ func jsonize(v interface{}) interface{} {
 		return v
 	}
 	if val, err := json.Marshal(v); err == nil {
-		if string(val) == "{}" {
+		if len(val) == 2 && val[0] == '{' && val[1] == '}' {
 			if e, ok := v.(error); ok {
 				return e.Error()
 			}

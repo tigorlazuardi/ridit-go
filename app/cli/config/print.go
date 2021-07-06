@@ -14,7 +14,9 @@ var printConfigCMD = &cobra.Command{
 		format, _ := cmd.Flags().GetString("type")
 		val, err := config.FormatConfig(format)
 		if err == config.ErrNotSupported {
-			logrus.WithError(err).WithField("supported_formats", "yaml,toml,json").Fatal(err)
+			logrus.
+				WithField("given_format", format).
+				WithField("supported_formats", "yaml,toml,json").Fatal(err)
 		} else if err != nil {
 			logrus.Fatal(err)
 		}
