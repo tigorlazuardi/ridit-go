@@ -8,8 +8,8 @@ import (
 type DownloadMeta struct {
 	URL             string `db:"url" json:"url"`
 	SubredditName   string `db:"subreddit_name" json:"subreddit_name"`
-	ImageHeight     uint32 `db:"image_height" json:"image_height"`
-	ImageWidth      uint32 `db:"image_width" json:"image_width"`
+	ImageHeight     uint   `db:"image_height" json:"image_height"`
+	ImageWidth      uint   `db:"image_width" json:"image_width"`
 	PostLink        string `db:"post_link" json:"post_link"`
 	NSFW            bool   `db:"nsfw" json:"nsfw"`
 	Filename        string `db:"filename" json:"filename"`

@@ -60,12 +60,12 @@ var setAspectRatioHeight = &cobra.Command{
 			return
 		}
 		entry := logrus.WithField("given_value", args[0]).WithField("example", cmd.Example)
-		val, err := strconv.ParseUint(args[0], 10, 64)
+		val, err := strconv.ParseFloat(args[0], 32)
 		if err != nil {
 			entry.Fatal("failed to parse value to positive integer value")
 		}
 		err = config.Modify(func(c *models.Config) {
-			c.AspectRatio.Height = uint(val)
+			c.AspectRatio.Height = float32(val)
 		})
 		if err != nil {
 			entry.Fatal(err)
@@ -84,12 +84,12 @@ var setAspectRatioWidth = &cobra.Command{
 			return
 		}
 		entry := logrus.WithField("given_value", args[0]).WithField("example", cmd.Example)
-		val, err := strconv.ParseUint(args[0], 10, 64)
+		val, err := strconv.ParseFloat(args[0], 32)
 		if err != nil {
 			entry.Fatal("failed to parse value to positive integer value")
 		}
 		err = config.Modify(func(c *models.Config) {
-			c.AspectRatio.Width = uint(val)
+			c.AspectRatio.Width = float32(val)
 		})
 		if err != nil {
 			entry.Fatal(err)

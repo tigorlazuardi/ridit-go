@@ -14,22 +14,54 @@ type Config struct {
 	Daemon      Daemon               `db:"daemon" json:"daemon" toml:"daemon" yaml:"daemon"`
 }
 
+func (c Config) GetAllSubreddits() []string {
+	result := []string{}
+	for k := range c.Subreddits {
+		result = append(result, k)
+	}
+	return result
+}
+
 type Subreddit struct {
 	Sort sort.Sort `db:"sort" json:"sort" toml:"sort" yaml:"sort" comment:"valid values = 'new, top, controversial, hot, rising'"`
-	Nsfw bool      `db:"nsfw" json:"nsfw" toml:"nsfw" yaml:"nsfw"`
+	NSFW bool      `db:"nsfw" json:"nsfw" toml:"nsfw" yaml:"nsfw"`
 }
 
 type AspectRatio struct {
 	Enabled bool    `db:"enabled" json:"enabled" toml:"enabled" yaml:"enabled"`
-	Height  uint    `db:"height" json:"height" toml:"height" yaml:"height"`
-	Width   uint    `db:"width" json:"width" toml:"width" yaml:"width"`
-	Range   float64 `db:"range" json:"range" toml:"range" yaml:"range"`
+	Height  float32 `db:"height" json:"height" toml:"height" yaml:"height" comment:"value of 0 or negative will resort to default. default 9"`
+	Width   float32 `db:"width" json:"width" toml:"width" yaml:"width" comment:"value of 0 or negative will resort to default. default 16"`
+	Range   float32 `db:"range" json:"range" toml:"range" yaml:"range" comment:"aspect ratio range to be considered valid. ar value gained by dividing width with height. default 0.5"`
+}
+
+func (ar AspectRatio) Passed(height, width uint) bool {
+	if !ar.Enabled {
+		return true
+	}
+	if ar.Height <= 0 {
+		ar.Height = 9
+	}
+	if ar.Width <= 0 {
+		ar.Width = 16
+	}
+	configAr := ar.Width / ar.Height
+	imageAr := float32(width) / float32(ar.Height)
+	minRatio := configAr - ar.Range
+	maxRatio := configAr + ar.Range
+	return imageAr >= minRatio && imageAr <= maxRatio
 }
 
 type MinimumSize struct {
 	Enabled bool `db:"enabled" json:"enabled" toml:"enabled" yaml:"enabled"`
-	Height  uint `db:"height" json:"height" toml:"height" yaml:"height"`
-	Width   uint `db:"width" json:"width" toml:"width" yaml:"width"`
+	Height  uint `db:"height" json:"height" toml:"height" yaml:"height" comment:"minimum pixel size in height"`
+	Width   uint `db:"width" json:"width" toml:"width" yaml:"width" comment:"minimum pixel size in width"`
+}
+
+func (ms MinimumSize) Passed(height, width uint) bool {
+	if !ms.Enabled {
+		return true
+	}
+	return height >= ms.Height && width >= ms.Width
 }
 
 type Download struct {
