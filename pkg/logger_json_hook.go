@@ -23,10 +23,18 @@ func (JSONHook) Levels() []logrus.Level {
 }
 
 func jsonize(v interface{}) interface{} {
-	if v, ok := v.([]byte); ok {
+	switch v := v.(type) {
+	case []byte:
 		return string(v)
+	case string:
+		return v
 	}
 	if val, err := json.Marshal(v); err == nil {
+		if string(val) == "{}" {
+			if e, ok := v.(error); ok {
+				return e.Error()
+			}
+		}
 		return string(val)
 	}
 	return v

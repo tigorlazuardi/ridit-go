@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/user"
-	"path"
+	"path/filepath"
 	"strings"
 
-	"github.com/pelletier/go-toml"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/tigorlazuardi/ridit-go/app/config/models"
 )
 
 func defaultConfigValue() string {
@@ -39,47 +37,41 @@ nsfw = true
 [subreddits.wallpapers]
 sort = "new"
 nsfw = true
+
+[daemon]
+port = 10101
+wallpaper_change = true
+wallpaper_interval = "10m"
 `
 
-	path := path.Join(GetHomeFolder(), "Pictures", "ridit")
+	path := filepath.Join(GetHomeFolder(), "Pictures", "ridit")
 	val := fmt.Sprintf(defaultValue, path)
 	return strings.TrimSpace(val)
 }
 
 func GetHomeFolder() string {
 	usr, _ := user.Current()
-	return strings.ReplaceAll(usr.HomeDir, string(os.PathSeparator), "/")
+	return usr.HomeDir
 }
 
 // Write default config file if config not found. Never ignore the returned value. Make sure to close the file.
-func LoadConfigFile() (*os.File, bool) {
+func LoadConfigFile() (*os.File, bool, error) {
 	loc := viper.GetString("configfile")
 	f, err := os.Open(loc)
 	if err != nil {
 		w, err := os.Create(loc)
 		if err != nil {
-			logrus.WithError(err).WithField("location", loc).Fatal("failed to create config file")
+			return w, false, err
 		}
 		_, err = w.WriteString(defaultConfigValue())
 		if err != nil {
-			logrus.WithError(err).WithField("location", loc).Fatal("failed to write default value to config file")
+			logrus.WithError(err).
+				WithField("location", loc).
+				WithField("solution", "try cleanup the location or set correct file / folder permission. make sure the user has permission to folder location").
+				Fatal("failed to write default value to config file")
 		}
-		return w, true
+		return w, true, nil
 	} else {
-		return f, false
+		return f, false, nil
 	}
-}
-
-func Load() (config models.Config) {
-	f, _ := LoadConfigFile()
-	defer f.Close()
-	tom, err := toml.LoadReader(f)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	err = tom.Unmarshal(&config)
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	return
 }

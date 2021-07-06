@@ -53,11 +53,11 @@ func (s Sort) String() string {
 }
 
 func (s Sort) MarshalText() ([]byte, error) {
-	return []byte("`" + s.String() + "`"), nil
+	return []byte(s.String()), nil
 }
 
 func (s Sort) MarshalJSON() ([]byte, error) {
-	return []byte("`" + s.String() + "`"), nil
+	return []byte(`"` + s.String() + `"`), nil
 }
 
 func (s *Sort) UnmarshalJSON(b []byte) error {

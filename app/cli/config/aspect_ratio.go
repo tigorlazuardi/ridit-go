@@ -2,17 +2,22 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/tigorlazuardi/ridit-go/app/config"
+	"github.com/tigorlazuardi/ridit-go/app/config/models"
 )
 
 var aspectRatioCmd = &cobra.Command{
-	Use:   "aspect_ratio",
-	Short: "set aspect_ratio parameters",
+	Use:     "aspect_ratio",
+	Short:   "set aspect_ratio parameters",
+	Example: "ridit config aspect_ratio enable",
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
+		os.Exit(1)
 	},
 }
 
@@ -20,14 +25,30 @@ var enableAspectRatio = &cobra.Command{
 	Use:     "enable",
 	Aliases: []string{"enabled", "true", "True"},
 	Short:   "enable image aspect ratio check",
-	Run:     func(cmd *cobra.Command, args []string) {},
+	Example: "ridit config aspect_ratio enable",
+	Run: func(cmd *cobra.Command, args []string) {
+		err := config.Modify(func(c *models.Config) {
+			c.AspectRatio.Enabled = true
+		})
+		if err != nil {
+			logrus.WithError(err).WithField("usage_example", cmd.Example).Fatal(err)
+		}
+	},
 }
 
 var disableAspectRatio = &cobra.Command{
 	Use:     "disable",
 	Aliases: []string{"disabled", "false", "False"},
 	Short:   "disable image aspect ratio check",
-	Run:     func(cmd *cobra.Command, args []string) {},
+	Example: "ridit config aspect_ratio disable",
+	Run: func(cmd *cobra.Command, args []string) {
+		err := config.Modify(func(c *models.Config) {
+			c.AspectRatio.Enabled = false
+		})
+		if err != nil {
+			logrus.WithError(err).WithField("usage_example", cmd.Example).Fatal(err)
+		}
+	},
 }
 
 var setAspectRatioHeight = &cobra.Command{

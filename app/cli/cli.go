@@ -20,7 +20,10 @@ var rootCmd = &cobra.Command{
 	Short: "reddit image downloader",
 	Long:  "A CLI program to download images from reddit",
 	Run: func(cmd *cobra.Command, args []string) {
-		config := configapi.Load()
+		config, err := configapi.Load()
+		if err != nil {
+			logrus.WithError(err).Fatal("failed to create config file")
+		}
 
 		fmt.Println(config.Download.Path)
 	},
@@ -28,7 +31,7 @@ var rootCmd = &cobra.Command{
 
 func Exec() {
 	if err := rootCmd.Execute(); err != nil {
-		logrus.WithError(err).Panic("failed to execute root command")
+		os.Exit(1)
 	}
 }
 
@@ -41,17 +44,19 @@ func init() {
 }
 
 func initConfigurations() {
+	dev := os.Getenv("RIDIT_LOCAL_DEVELOPMENT") != ""
 	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors:            os.Getenv("RIDIT_LOCAL_DEVELOPMENT") != "",
+		ForceColors:            dev,
 		PadLevelText:           true,
 		DisableLevelTruncation: true,
 		FullTimestamp:          true,
 		TimestampFormat:        "Jan 02 15:04:05",
 	})
 	logrus.AddHook(&pkg.JSONHook{})
+	logrus.AddHook(&pkg.FrameHook{Disabled: !dev})
 	prof, _ := rootCmd.Flags().GetString("profile")
 	dir := configdir.LocalConfig("ridit", prof)
-	err := os.MkdirAll(dir, os.ModeDir)
+	err := os.MkdirAll(dir, 0777)
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to create configuration folder on ", dir)
 	}
@@ -61,7 +66,10 @@ func initConfigurations() {
 	}
 	viper.Set("configfile", path.Join(dir, configapi.Filename))
 
-	file, created := configapi.LoadConfigFile()
+	file, created, err := configapi.LoadConfigFile()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to create config file")
+	}
 	defer file.Close()
 
 	if created {
