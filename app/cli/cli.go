@@ -2,8 +2,9 @@ package cli
 
 import (
 	"context"
+	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/kirsle/configdir"
 	"github.com/sirupsen/logrus"
@@ -12,6 +13,7 @@ import (
 	"github.com/tigorlazuardi/ridit-go/app/cli/config"
 	"github.com/tigorlazuardi/ridit-go/app/cli/subreddit"
 	configapi "github.com/tigorlazuardi/ridit-go/app/config"
+	"github.com/tigorlazuardi/ridit-go/app/reddit"
 	"github.com/tigorlazuardi/ridit-go/pkg"
 )
 
@@ -24,10 +26,18 @@ var rootCmd = &cobra.Command{
 		entry := pkg.EntryFromContext(ctx)
 		config, err := configapi.Load()
 		if err != nil {
-			entry.WithError(err).Fatal("failed to create config file")
+			entry.WithError(err).Fatal("failed to read config file")
 		}
 
-		entry.Println(config.Download.Path)
+		repository := reddit.NewRepository(http.DefaultClient, config)
+		for fChan := range repository.GetListing(ctx) {
+			if fChan.Err != nil {
+				err = fChan.Err
+				entry.WithError(err).Error(err)
+			} else {
+				entry.WithField("data", fChan.Downloads).Debug("data")
+			}
+		}
 	},
 }
 
@@ -44,6 +54,7 @@ func init() {
 	rootCmd.AddCommand(subreddit.SubredditCMD)
 	rootCmd.PersistentFlags().StringP("profile", "p", "main", "sets the profile to use")
 	rootCmd.PersistentFlags().CountP("verbose", "v", "set verbose level. Set once to print debug level, repeat to print everything")
+	rootCmd.PersistentFlags().BoolP("machine", "m", false, "runs the cli program with assumption machine is executing the application. logs will now appear in json format")
 }
 
 func initConfigurations() {
@@ -55,10 +66,16 @@ func initConfigurations() {
 		FullTimestamp:          true,
 		TimestampFormat:        "Jan 02 15:04:05",
 	})
+	if dev {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
+	if machine, _ := rootCmd.PersistentFlags().GetBool("machine"); machine {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	}
 	logrus.AddHook(&pkg.JSONHook{})
 	logrus.AddHook(&pkg.FrameHook{Disabled: !dev})
 	prof, _ := rootCmd.Flags().GetString("profile")
-	dir := configdir.LocalConfig("ridit", prof)
+	dir := configdir.LocalConfig("ridit")
 	err := os.MkdirAll(dir, 0777)
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to create configuration folder on ", dir)
@@ -67,7 +84,7 @@ func initConfigurations() {
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to bind flags from cobra")
 	}
-	viper.Set("configfile", path.Join(dir, configapi.Filename))
+	viper.Set("configfile", filepath.Join(dir, prof+".toml"))
 
 	file, created, err := configapi.LoadConfigFile()
 	if err != nil {

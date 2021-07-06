@@ -10,10 +10,6 @@ import (
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
 )
 
-const (
-	Filename string = "ridit.toml"
-)
-
 func Modify(f func(*models.Config)) error {
 	config, err := Load()
 	if err != nil {
@@ -22,7 +18,7 @@ func Modify(f func(*models.Config)) error {
 	f(&config)
 	val, _ := toml.Marshal(config)
 	configdir := configdir.LocalConfig("ridit", viper.GetString("profile"))
-	path := filepath.Join(configdir, Filename)
+	path := filepath.Join(configdir, viper.GetString("profile")+".toml")
 	return ioutil.WriteFile(path, val, 0777)
 }
 

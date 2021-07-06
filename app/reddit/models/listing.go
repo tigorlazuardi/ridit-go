@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
@@ -41,7 +40,6 @@ func (l Listing) IntoDownloadMetas(ctx context.Context, config confmodel.Config)
 		if err != nil {
 			continue
 		}
-
 		if !config.AspectRatio.Passed(height, width) {
 			continue
 		}
@@ -53,7 +51,7 @@ func (l Listing) IntoDownloadMetas(ctx context.Context, config confmodel.Config)
 			SubredditName:   data.Subreddit,
 			ImageHeight:     height,
 			ImageWidth:      width,
-			PostLink:        fmt.Sprintf("https://reddit.com%s", data.Permalink),
+			PostLink:        "https://reddit.com" + data.Permalink,
 			URL:             data.URL,
 			NSFW:            data.Over18,
 			Title:           data.Title,
@@ -87,7 +85,7 @@ type ChildrenData struct {
 	Subreddit string   `json:"subreddit"`
 	Title     string   `json:"title"`
 	PostHint  *string  `json:"post_hint"`
-	Created   uint64   `json:"created"`
+	Created   float64  `json:"created"`
 	Over18    bool     `json:"over_18"`
 	Preview   *Preview `json:"preview"`
 	ID        string   `json:"id"`

@@ -1,52 +1,54 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
-	"strings"
+	"time"
 
+	"github.com/pelletier/go-toml"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/tigorlazuardi/ridit-go/app/config/models"
+	"github.com/tigorlazuardi/ridit-go/app/config/models/sort"
 )
 
-func defaultConfigValue() string {
-	const defaultValue = `
-[download]
-path = "%s"
-connect_timeout = "5s"
-timeout = "30s"
-
-[aspect_ratio]
-enabled = true
-height = 16
-width = 9
-range = 0.5
-
-[minimum_size]
-enabled = true
-height = 1080
-width = 1920
-
-[subreddits]
-[subreddits.wallpaper]
-sort = "new"
-nsfw = true
-
-[subreddits.wallpapers]
-sort = "new"
-nsfw = true
-
-[daemon]
-port = 10101
-wallpaper_change = true
-wallpaper_interval = "10m"
-`
-
+func defaultConfigValue() models.Config {
 	path := filepath.Join(GetHomeFolder(), "Pictures", "ridit")
-	val := fmt.Sprintf(defaultValue, path)
-	return strings.TrimSpace(val)
+	config := models.Config{
+		Download: models.Download{
+			Path:           path,
+			ConnectTimeout: models.Duration{Duration: time.Second * 5},
+			Timeout:        models.Duration{Duration: time.Second * 30},
+		},
+		AspectRatio: models.AspectRatio{
+			Enabled: true,
+			Height:  9.0,
+			Width:   16.0,
+			Range:   0.5,
+		},
+		MinimumSize: models.MinimumSize{
+			Enabled: true,
+			Height:  1080,
+			Width:   1920,
+		},
+		Subreddits: map[string]models.Subreddit{
+			"wallpaper": {
+				Sort: sort.New,
+				NSFW: true,
+			},
+			"wallpapers": {
+				Sort: sort.New,
+				NSFW: true,
+			},
+		},
+		Daemon: models.Daemon{
+			Port:              10101,
+			WallpaperChange:   true,
+			WallpaperInterval: models.Duration{Duration: time.Minute * 10},
+		},
+	}
+	return config
 }
 
 func GetHomeFolder() string {
@@ -63,7 +65,8 @@ func LoadConfigFile() (*os.File, bool, error) {
 		if err != nil {
 			return w, false, err
 		}
-		_, err = w.WriteString(defaultConfigValue())
+		val, _ := toml.Marshal(defaultConfigValue())
+		_, err = w.Write(val)
 		if err != nil {
 			logrus.WithError(err).
 				WithField("location", loc).

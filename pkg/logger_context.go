@@ -14,7 +14,7 @@ type entryKey struct{}
 var ContextEntryKey = entryKey{}
 
 func ContextWithNewEntry(ctx context.Context) context.Context {
-	entry := logrus.NewEntry(logrus.StandardLogger()).WithContext(ctx).WithField("transaction.id", uuid.NewV4().String())
+	entry := logrus.NewEntry(logrus.StandardLogger()).WithContext(ctx).WithField("_trace", uuid.NewV4().String())
 	return ContextWithEntry(ctx, entry)
 }
 
@@ -25,7 +25,7 @@ func ContextWithEntry(ctx context.Context, entry *logrus.Entry) context.Context 
 func EntryFromContext(ctx context.Context) *logrus.Entry {
 	entry, ok := ctx.Value(ContextEntryKey).(*logrus.Entry)
 	if !ok {
-		return logrus.NewEntry(logrus.StandardLogger()).WithContext(ctx).WithField("transaction.id", uuid.NewV4().String())
+		return logrus.NewEntry(logrus.StandardLogger()).WithContext(ctx).WithField("_trace", uuid.NewV4().String())
 	}
 	return entry.WithContext(ctx)
 }
