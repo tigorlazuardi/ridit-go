@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/avast/retry-go"
+	"github.com/gookit/color"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
@@ -59,7 +60,6 @@ func (r Repository) Fetch(ctx context.Context) <-chan DownloadChan {
 			wg.Add(1)
 			go func(ctx context.Context, subreddit string, subconf confmodel.Subreddit) {
 				defer wg.Done()
-				// defer r.sem.Release(1)
 				ctx = pkg.ContextEntryWithFields(ctx, logrus.Fields{
 					"subreddit":     subreddit,
 					"configuration": subconf,
@@ -163,18 +163,28 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 		}
 
 		var reader = res.Body
+		// cut the https://
 		if pkg.IsTerminal() {
+			job := meta.URL[8:]
+			if len(job) >= 27 {
+				job = job[:27]
+			}
+			job = color.FgWhite.Render(job)
+			sub := color.FgLightBlue.Render("[" + meta.SubredditName + "]")
+			downloading := color.FgLightYellow.Render("downloading")
+			retrying := color.FgLightRed.Render("retrying")
+			done := color.FgGreen.Render("done")
 			var bar *mpb.Bar
 			leftDecor := mpb.PrependDecorators(
-				decor.Name("["+meta.SubredditName+"]", decor.WCSyncSpaceR),
-				decor.Name(meta.URL, decor.WCSyncSpaceR),
-				decor.OnComplete(decor.Name("downloading", decor.WCSyncSpaceR), "done"),
+				decor.Name(sub, decor.WC{W: 23, C: decor.DidentRight}),
+				decor.Name(job, decor.WC{W: 28, C: decor.DidentRight}),
+				decor.OnComplete(decor.Name(downloading, decor.WC{W: 11, C: decor.DidentRight}), done),
 			)
 			if i > 0 {
 				leftDecor = mpb.PrependDecorators(
-					decor.Name("["+meta.SubredditName+"]", decor.WCSyncSpaceR),
-					decor.Name(meta.URL, decor.WCSyncSpaceR),
-					decor.OnComplete(decor.Name("retrying", decor.WCSyncSpaceR), "done"),
+					decor.Name("["+meta.SubredditName+"]", decor.WC{W: 23, C: decor.DidentRight}),
+					decor.Name(job, decor.WC{W: 28, C: decor.DidentRight}),
+					decor.OnComplete(decor.Name(retrying, decor.WC{W: 11, C: decor.DidentRight}), done),
 				)
 			}
 			if res.ContentLength < 0 {
@@ -183,12 +193,14 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 				bar = r.bars.AddBar(res.ContentLength,
 					leftDecor,
 					mpb.AppendDecorators(
-						decor.CountersKiloByte("%d / %d", decor.WCSyncSpaceR),
-						decor.Percentage(decor.WCSyncSpaceR),
+						decor.CountersKiloByte("%d / %d", decor.WC{W: 14, C: decor.DidentRight}),
+						decor.Percentage(decor.WC{W: 5, C: decor.DidentRight}),
 					),
 				)
 			}
 			reader = bar.ProxyReader(res.Body)
+		} else {
+			entry.WithField("subreddit", meta.SubredditName)
 		}
 		_, err = io.Copy(file, reader)
 		file.Close()
