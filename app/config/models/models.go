@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Profile     string               `db:"profile" json:"profile" toml:"profile" yaml:"profile"`
 	Download    Download             `db:"download" json:"download" toml:"download" yaml:"download"`
 	AspectRatio AspectRatio          `db:"aspect_ratio" json:"aspect_ratio" toml:"aspect_ratio" yaml:"aspect_ratio"`
 	MinimumSize MinimumSize          `db:"minimum_size" json:"minimum_size" toml:"minimum_size" yaml:"minimum_size"`

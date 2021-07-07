@@ -2,28 +2,24 @@ package config
 
 import (
 	"io/ioutil"
-	"path/filepath"
 
-	"github.com/kirsle/configdir"
 	"github.com/pelletier/go-toml"
-	"github.com/spf13/viper"
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
 )
 
-func Modify(f func(*models.Config)) error {
-	config, err := Load()
+func Modify(profile string, f func(*models.Config)) error {
+	config, err := Load(profile)
 	if err != nil {
 		return err
 	}
 	f(&config)
 	val, _ := toml.Marshal(config)
-	configdir := configdir.LocalConfig("ridit", viper.GetString("profile"))
-	path := filepath.Join(configdir, viper.GetString("profile")+".toml")
+	path := GetConfigFilePath(profile)
 	return ioutil.WriteFile(path, val, 0777)
 }
 
-func Load() (config models.Config, err error) {
-	f, _, err := LoadConfigFile()
+func Load(profile string) (config models.Config, err error) {
+	f, _, err := LoadConfigFile(profile)
 	if err != nil {
 		return
 	}

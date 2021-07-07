@@ -12,7 +12,8 @@ var printConfigCMD = &cobra.Command{
 	Short:   "prints current configuration to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
 		format, _ := cmd.Flags().GetString("type")
-		val, err := config.FormatConfig(format)
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		val, err := config.FormatConfig(profile, format)
 		if err == config.ErrNotSupported {
 			logrus.
 				WithField("given_format", format).

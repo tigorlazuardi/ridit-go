@@ -6,16 +6,17 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kirsle/configdir"
 	"github.com/pelletier/go-toml"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
 	"github.com/tigorlazuardi/ridit-go/app/config/models/sort"
 )
 
-func defaultConfigValue() models.Config {
+func defaultConfigValue(profile string) models.Config {
 	path := filepath.Join(GetHomeFolder(), "Pictures", "ridit")
 	config := models.Config{
+		Profile: profile,
 		Download: models.Download{
 			Path:           path,
 			ConnectTimeout: models.Duration{Duration: time.Second * 5},
@@ -56,16 +57,20 @@ func GetHomeFolder() string {
 	return usr.HomeDir
 }
 
+func GetConfigFilePath(profile string) string {
+	return filepath.Join(configdir.LocalConfig("ridit", profile+".toml"))
+}
+
 // Write default config file if config not found. Never ignore the returned value. Make sure to close the file.
-func LoadConfigFile() (*os.File, bool, error) {
-	loc := viper.GetString("configfile")
+func LoadConfigFile(profile string) (*os.File, bool, error) {
+	loc := GetConfigFilePath(profile)
 	f, err := os.Open(loc)
 	if err != nil {
 		w, err := os.Create(loc)
 		if err != nil {
 			return w, false, err
 		}
-		val, _ := toml.Marshal(defaultConfigValue())
+		val, _ := toml.Marshal(defaultConfigValue(profile))
 		_, err = w.Write(val)
 		if err != nil {
 			logrus.WithError(err).

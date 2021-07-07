@@ -1,33 +1,25 @@
 package models
 
 import (
-	"context"
 	"errors"
 	"strings"
 
 	confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
-	"github.com/tigorlazuardi/ridit-go/pkg"
 )
 
 type Listing struct {
 	Data Data `json:"data"`
 }
 
-func (l Listing) IntoDownloadMetas(ctx context.Context, config confmodel.Config) []DownloadMeta {
-	entry := pkg.EntryFromContext(ctx)
+func (l Listing) IntoDownloadMetas(config confmodel.Config) []DownloadMeta {
 	result := []DownloadMeta{}
 	for _, children := range l.Data.Children {
 		data := children.Data
 		sub := data.Subreddit
-		if _, ok := config.Subreddits[sub]; !ok {
-			entry.WithFields(pkg.M{
-				"list_subreddit":    sub,
-				"config_subreddits": config.GetAllSubreddits(),
-			}).Fatal("config subreddit should match listing subreddit")
-		}
 		if data.IsVideo {
 			continue
 		}
+
 		if data.Over18 && !config.Subreddits[sub].NSFW {
 			continue
 		}
@@ -47,6 +39,11 @@ func (l Listing) IntoDownloadMetas(ctx context.Context, config confmodel.Config)
 		if !config.MinimumSize.Passed(height, width) {
 			continue
 		}
+
+		filename := getFilenameFromURL(data.URL)
+		if !strings.HasSuffix(filename, ".png") && !strings.HasSuffix(filename, ".jpg") && !strings.HasSuffix(filename, ".jpeg") {
+			continue
+		}
 		meta := DownloadMeta{
 			SubredditName:   data.Subreddit,
 			ImageHeight:     height,
@@ -56,7 +53,7 @@ func (l Listing) IntoDownloadMetas(ctx context.Context, config confmodel.Config)
 			NSFW:            data.Over18,
 			Title:           data.Title,
 			Author:          data.Author,
-			Filename:        getFilenameFromURL(data.URL),
+			Filename:        filename,
 			SuccessDownload: false,
 		}
 		result = append(result, meta)

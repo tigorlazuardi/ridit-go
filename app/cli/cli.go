@@ -24,18 +24,19 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := cmd.Context()
 		entry := pkg.EntryFromContext(ctx)
-		config, err := configapi.Load()
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		config, err := configapi.Load(profile)
 		if err != nil {
 			entry.WithError(err).Fatal("failed to read config file")
 		}
 
 		repository := reddit.NewRepository(http.DefaultClient, config)
-		for fChan := range repository.GetListing(ctx) {
+		for fChan := range repository.Fetch(ctx) {
 			if fChan.Err != nil {
 				err = fChan.Err
 				entry.WithError(err).Error(err)
 			} else {
-				entry.WithField("data", fChan.Downloads).Debug("data")
+				entry.WithField("data", fChan.Download).Trace("operation done")
 			}
 		}
 	},
@@ -86,7 +87,7 @@ func initConfigurations() {
 	}
 	viper.Set("configfile", filepath.Join(dir, prof+".toml"))
 
-	file, created, err := configapi.LoadConfigFile()
+	file, created, err := configapi.LoadConfigFile(prof)
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to create config file")
 	}

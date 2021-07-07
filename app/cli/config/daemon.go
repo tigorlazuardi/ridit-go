@@ -38,7 +38,8 @@ var daemonPortConfig = &cobra.Command{
 		if val < 1 || val > 65535 {
 			entry.Fatal("unsupported port value. Port must be a value between 1 - 65535. Port 1 - 1023 requires root/admin privilege")
 		}
-		err = config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err = config.Modify(profile, func(c *models.Config) {
 			c.Daemon.Port = uint(val)
 		})
 		if err != nil {
@@ -72,7 +73,8 @@ var daemonWallpaperInterval = &cobra.Command{
 			entry.WithError(err).
 				Fatal("failed to parse time format. see https://golang.org/pkg/time/#ParseDuration for format")
 		}
-		err = config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err = config.Modify(profile, func(c *models.Config) {
 			c.Daemon.WallpaperInterval = models.Duration{Duration: dur}
 		})
 		if err != nil {
@@ -89,7 +91,8 @@ var enableWallpaperChange = &cobra.Command{
 	Short:   "enable wallpaper change",
 	Example: "ridit config daemon wallpaper enable",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err := config.Modify(profile, func(c *models.Config) {
 			c.Daemon.WallpaperChange = true
 		})
 		if err != nil {
@@ -104,7 +107,8 @@ var disableWallpaperChange = &cobra.Command{
 	Short:   "disable wallpaper change",
 	Example: "ridit config daemon wallpaper disable",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err := config.Modify(profile, func(c *models.Config) {
 			c.Daemon.WallpaperChange = false
 		})
 		if err != nil {

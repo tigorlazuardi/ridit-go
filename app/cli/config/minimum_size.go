@@ -26,7 +26,8 @@ var enableMinimumSize = &cobra.Command{
 	Aliases: []string{"enabled", "true", "True"},
 	Example: "ridit config minimum_size enable",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err := config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Enabled = true
 		})
 		if err != nil {
@@ -42,7 +43,8 @@ var disableMinimumSize = &cobra.Command{
 	Aliases: []string{"disabled", "false", "False"},
 	Example: "ridit config minimum_size disable",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err := config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Enabled = false
 		})
 		if err != nil {
@@ -66,7 +68,8 @@ var setMinimumSizeHeight = &cobra.Command{
 		if err != nil {
 			entry.WithError(err).Fatal("failed to parse height to positive integer value")
 		}
-		err = config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err = config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Height = uint(val)
 		})
 		if err != nil {
@@ -90,7 +93,8 @@ var setMinimumSizeWidth = &cobra.Command{
 		if err != nil {
 			entry.WithError(err).Fatal("failed to parse width to positive integer value")
 		}
-		err = config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err = config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Width = uint(val)
 		})
 		if err != nil {

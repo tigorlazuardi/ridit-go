@@ -26,7 +26,8 @@ var enableAspectRatio = &cobra.Command{
 	Short:   "enable image aspect ratio check",
 	Example: "ridit config aspect_ratio enable",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err := config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Enabled = true
 		})
 		if err != nil {
@@ -41,7 +42,8 @@ var disableAspectRatio = &cobra.Command{
 	Short:   "disable image aspect ratio check",
 	Example: "ridit config aspect_ratio disable",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err := config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Enabled = false
 		})
 		if err != nil {
@@ -64,7 +66,8 @@ var setAspectRatioHeight = &cobra.Command{
 		if err != nil {
 			entry.Fatal("failed to parse value to positive integer value")
 		}
-		err = config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err = config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Height = float32(val)
 		})
 		if err != nil {
@@ -88,7 +91,8 @@ var setAspectRatioWidth = &cobra.Command{
 		if err != nil {
 			entry.Fatal("failed to parse value to positive integer value")
 		}
-		err = config.Modify(func(c *models.Config) {
+		profile, _ := cmd.PersistentFlags().GetString("profile")
+		err = config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Width = float32(val)
 		})
 		if err != nil {

@@ -15,6 +15,7 @@ type DownloadMeta struct {
 	Filename        string `db:"filename" json:"filename"`
 	Title           string `db:"title" json:"title"`
 	Author          string `db:"author" json:"author"`
+	Profile         string `db:"profile" json:"profile"`
 	SuccessDownload bool   `db:"success_download" json:"success_download"`
 }
 
