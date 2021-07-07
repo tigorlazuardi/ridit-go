@@ -13,6 +13,7 @@ import (
 
 	"github.com/avast/retry-go"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
 	"github.com/tigorlazuardi/ridit-go/app/reddit/models"
 	"github.com/tigorlazuardi/ridit-go/pkg"
@@ -24,6 +25,7 @@ type Repository struct {
 	client pkg.Doer
 	config confmodel.Config
 	bars   *mpb.Progress
+	sem    chan struct{}
 }
 
 type RepositoryError struct {
@@ -44,6 +46,7 @@ func NewRepository(client pkg.Doer, config confmodel.Config) Repository {
 		client: client,
 		config: config,
 		bars:   mpb.New(mpb.WithOutput(os.Stdout)),
+		sem:    make(chan struct{}, viper.GetUint("concurrency")),
 	}
 }
 
@@ -56,6 +59,7 @@ func (r Repository) Fetch(ctx context.Context) <-chan DownloadChan {
 			wg.Add(1)
 			go func(ctx context.Context, subreddit string, subconf confmodel.Subreddit) {
 				defer wg.Done()
+				// defer r.sem.Release(1)
 				ctx = pkg.ContextEntryWithFields(ctx, logrus.Fields{
 					"subreddit":     subreddit,
 					"configuration": subconf,
@@ -91,8 +95,12 @@ func (r Repository) downloadImages(ctx context.Context, lc <-chan ListingChan) <
 				wgg := &sync.WaitGroup{}
 				for _, meta := range listing.Downloads {
 					wgg.Add(1)
+					r.sem <- struct{}{}
 					go func(ctx context.Context, meta models.DownloadMeta) {
 						defer wgg.Done()
+						defer func() {
+							<-r.sem
+						}()
 						ctx = pkg.ContextEntryWithFields(ctx, logrus.Fields{"url": meta.URL})
 						err := r.download(ctx, meta)
 						dc <- DownloadChan{
@@ -122,6 +130,7 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 		return nil
 	}
 	f.Close()
+	var i uint = 0
 	err = retry.Do(func() error {
 		ctx, done := context.WithTimeout(ctx, r.config.Download.Timeout.Duration)
 		defer done()
@@ -154,44 +163,52 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 		}
 
 		var reader = res.Body
-		if isTerminal() {
+		if pkg.IsTerminal() {
 			var bar *mpb.Bar
 			leftDecor := mpb.PrependDecorators(
 				decor.Name("["+meta.SubredditName+"]", decor.WCSyncSpaceR),
 				decor.Name(meta.URL, decor.WCSyncSpaceR),
 				decor.OnComplete(decor.Name("downloading", decor.WCSyncSpaceR), "done"),
 			)
+			if i > 0 {
+				leftDecor = mpb.PrependDecorators(
+					decor.Name("["+meta.SubredditName+"]", decor.WCSyncSpaceR),
+					decor.Name(meta.URL, decor.WCSyncSpaceR),
+					decor.OnComplete(decor.Name("retrying", decor.WCSyncSpaceR), "done"),
+				)
+			}
 			if res.ContentLength < 0 {
 				bar = r.bars.AddSpinner(res.ContentLength, leftDecor)
 			} else {
 				bar = r.bars.AddBar(res.ContentLength,
 					leftDecor,
 					mpb.AppendDecorators(
-						decor.CountersKiloByte("%d /%d", decor.WCSyncSpaceR),
+						decor.CountersKiloByte("%d / %d", decor.WCSyncSpaceR),
 						decor.Percentage(decor.WCSyncSpaceR),
 					),
 				)
 			}
-
 			reader = bar.ProxyReader(res.Body)
 		}
 		_, err = io.Copy(file, reader)
+		file.Close()
 		if err != nil {
 			return err
 		}
 
-		if !isTerminal() {
+		if !pkg.IsTerminal() {
 			entry.Info("download success")
 		}
 
 		return nil
 	}, retry.Attempts(3), retry.OnRetry(func(n uint, err error) {
-		if !isTerminal() {
+		i = n
+		if !pkg.IsTerminal() {
 			entry.WithError(err).WithField("attempt", n).Error("failed downloading image. retrying...")
 		}
 	}))
 	if err != nil {
-		if !isTerminal() {
+		if !pkg.IsTerminal() {
 			entry.WithError(err).Error("remove fail download")
 		}
 		errRemove := os.Remove(path)
@@ -203,15 +220,10 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 	return nil
 }
 
-func isTerminal() bool {
-	fileinfo, _ := os.Stdout.Stat()
-	return (fileinfo.Mode() & os.ModeCharDevice) != 0
-}
-
 func (r Repository) downloadListing(ctx context.Context, subreddit string, subconf confmodel.Subreddit) ([]models.DownloadMeta, error) {
 	entry := pkg.EntryFromContext(ctx)
 	result := []models.DownloadMeta{}
-	url := fmt.Sprintf("https://reddit.com/r/%s/%s.json", subreddit, subconf.Sort)
+	url := fmt.Sprintf("https://reddit.com/r/%s/%s.json?limit=100", subreddit, subconf.Sort)
 	entry.Trace(url)
 	var resp *http.Response
 	select {
@@ -220,9 +232,6 @@ func (r Repository) downloadListing(ctx context.Context, subreddit string, subco
 	default:
 	}
 	err := retry.Do(func() error {
-		// ctx, done := context.WithTimeout(ctx, r.config.Download.Timeout.Duration)
-		// defer done()
-
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 		if err != nil {
 			return retry.Unrecoverable(err)
@@ -263,4 +272,45 @@ func (r Repository) downloadListing(ctx context.Context, subreddit string, subco
 		return result, err
 	}
 	return listing.IntoDownloadMetas(r.config), nil
+}
+
+type Check struct {
+	Name  string
+	Exist bool
+	Err   error
+}
+
+// Creates client if Doer is nil
+func CheckSubredditExist(client pkg.Doer, ctx context.Context, subreddits []string) <-chan Check {
+	cc := make(chan Check)
+	go func() {
+		if client == nil {
+			client = http.DefaultClient
+		}
+		wg := sync.WaitGroup{}
+		for _, v := range subreddits {
+			wg.Add(1)
+			go func(subreddit string) {
+				defer wg.Done()
+				url := "https://reddit.com/r/" + subreddit + ".json"
+				req, _ := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+				req.Header.Add("User-Agent", "ridit")
+				res, err := client.Do(req)
+				if err != nil {
+					cc <- Check{Name: subreddit, Err: err}
+					return
+				}
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					cc <- Check{Name: subreddit}
+					return
+				}
+				cc <- Check{Name: subreddit, Exist: true}
+			}(v)
+		}
+		wg.Wait()
+		close(cc)
+	}()
+	return cc
 }

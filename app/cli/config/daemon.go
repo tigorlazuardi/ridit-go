@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tigorlazuardi/ridit-go/app/config"
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
 	"github.com/tigorlazuardi/ridit-go/pkg"
@@ -16,7 +17,8 @@ var daemonConfigCMD = &cobra.Command{
 	Aliases: []string{"http", "server"},
 	Short:   "sets various daemon / http configuration",
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = cmd.Help()
+		entry := pkg.EntryFromContext(cmd.Context())
+		entry.Fatal("daemon not implemented yet")
 	},
 }
 
@@ -38,7 +40,7 @@ var daemonPortConfig = &cobra.Command{
 		if val < 1 || val > 65535 {
 			entry.Fatal("unsupported port value. Port must be a value between 1 - 65535. Port 1 - 1023 requires root/admin privilege")
 		}
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err = config.Modify(profile, func(c *models.Config) {
 			c.Daemon.Port = uint(val)
 		})
@@ -73,7 +75,7 @@ var daemonWallpaperInterval = &cobra.Command{
 			entry.WithError(err).
 				Fatal("failed to parse time format. see https://golang.org/pkg/time/#ParseDuration for format")
 		}
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err = config.Modify(profile, func(c *models.Config) {
 			c.Daemon.WallpaperInterval = models.Duration{Duration: dur}
 		})
@@ -91,12 +93,13 @@ var enableWallpaperChange = &cobra.Command{
 	Short:   "enable wallpaper change",
 	Example: "ridit config daemon wallpaper enable",
 	Run: func(cmd *cobra.Command, args []string) {
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		entry := pkg.EntryFromContext(cmd.Context())
+		profile := viper.GetString("profile")
 		err := config.Modify(profile, func(c *models.Config) {
 			c.Daemon.WallpaperChange = true
 		})
 		if err != nil {
-			logrus.WithField("usage_example", cmd.Example).Fatal(err)
+			entry.WithField("usage_example", cmd.Example).Fatal(err)
 		}
 		logrus.Println("enabled wallpaper change")
 	},
@@ -107,12 +110,13 @@ var disableWallpaperChange = &cobra.Command{
 	Short:   "disable wallpaper change",
 	Example: "ridit config daemon wallpaper disable",
 	Run: func(cmd *cobra.Command, args []string) {
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		entry := pkg.EntryFromContext(cmd.Context())
+		profile := viper.GetString("profile")
 		err := config.Modify(profile, func(c *models.Config) {
 			c.Daemon.WallpaperChange = false
 		})
 		if err != nil {
-			logrus.WithField("usage_example", cmd.Example).Fatal(err)
+			entry.WithField("usage_example", cmd.Example).Fatal(err)
 		}
 		logrus.Println("disabled wallpaper change")
 	},

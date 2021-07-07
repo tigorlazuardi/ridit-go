@@ -1,8 +1,11 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tigorlazuardi/ridit-go/app/config"
 )
 
@@ -12,8 +15,7 @@ var printConfigCMD = &cobra.Command{
 	Short:   "prints current configuration to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
 		format, _ := cmd.Flags().GetString("type")
-		profile, _ := cmd.PersistentFlags().GetString("profile")
-		val, err := config.FormatConfig(profile, format)
+		val, err := config.FormatConfig(viper.GetString("profile"), format)
 		if err == config.ErrNotSupported {
 			logrus.
 				WithField("given_format", format).
@@ -21,7 +23,7 @@ var printConfigCMD = &cobra.Command{
 		} else if err != nil {
 			logrus.Fatal(err)
 		}
-		logrus.Println(string(val))
+		fmt.Println(string(val))
 	},
 }
 

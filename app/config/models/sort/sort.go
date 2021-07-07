@@ -1,7 +1,7 @@
 package sort
 
 import (
-	"strconv"
+	"errors"
 	"strings"
 )
 
@@ -28,7 +28,7 @@ func Parse(s string) (Sort, error) {
 	case "top":
 		return Top, nil
 	default:
-		return New, &strconv.NumError{Func: "Parse", Num: s, Err: strconv.ErrRange}
+		return New, errors.New("failed to parse sorting value")
 	}
 }
 

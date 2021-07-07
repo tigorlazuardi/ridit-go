@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tigorlazuardi/ridit-go/app/config"
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
 )
@@ -26,7 +27,7 @@ var enableMinimumSize = &cobra.Command{
 	Aliases: []string{"enabled", "true", "True"},
 	Example: "ridit config minimum_size enable",
 	Run: func(cmd *cobra.Command, args []string) {
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err := config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Enabled = true
 		})
@@ -43,7 +44,7 @@ var disableMinimumSize = &cobra.Command{
 	Aliases: []string{"disabled", "false", "False"},
 	Example: "ridit config minimum_size disable",
 	Run: func(cmd *cobra.Command, args []string) {
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err := config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Enabled = false
 		})
@@ -68,7 +69,7 @@ var setMinimumSizeHeight = &cobra.Command{
 		if err != nil {
 			entry.WithError(err).Fatal("failed to parse height to positive integer value")
 		}
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err = config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Height = uint(val)
 		})
@@ -93,7 +94,7 @@ var setMinimumSizeWidth = &cobra.Command{
 		if err != nil {
 			entry.WithError(err).Fatal("failed to parse width to positive integer value")
 		}
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err = config.Modify(profile, func(c *models.Config) {
 			c.MinimumSize.Width = uint(val)
 		})

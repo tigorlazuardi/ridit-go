@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/kirsle/configdir"
 	"github.com/sirupsen/logrus"
@@ -22,9 +23,14 @@ var rootCmd = &cobra.Command{
 	Short: "reddit image downloader",
 	Long:  "A CLI program to download images from reddit",
 	Run: func(cmd *cobra.Command, args []string) {
+		defer func() {
+			if pkg.IsTerminal() {
+				time.Sleep(100 * time.Millisecond)
+			}
+		}()
 		ctx := cmd.Context()
 		entry := pkg.EntryFromContext(ctx)
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		config, err := configapi.Load(profile)
 		if err != nil {
 			entry.WithError(err).Fatal("failed to read config file")
@@ -55,7 +61,7 @@ func init() {
 	rootCmd.AddCommand(subreddit.SubredditCMD)
 	rootCmd.PersistentFlags().StringP("profile", "p", "main", "sets the profile to use")
 	rootCmd.PersistentFlags().CountP("verbose", "v", "set verbose level. Set once to print debug level, repeat to print everything")
-	rootCmd.PersistentFlags().BoolP("machine", "m", false, "runs the cli program with assumption machine is executing the application. logs will now appear in json format")
+	rootCmd.PersistentFlags().Uint("concurrency", 8, "set maximum number of concurrency when downloading images")
 }
 
 func initConfigurations() {
@@ -70,7 +76,7 @@ func initConfigurations() {
 	if dev {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	if machine, _ := rootCmd.PersistentFlags().GetBool("machine"); machine {
+	if !pkg.IsTerminal() {
 		logrus.SetFormatter(&logrus.JSONFormatter{})
 	}
 	logrus.AddHook(&pkg.JSONHook{})

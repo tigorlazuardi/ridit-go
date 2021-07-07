@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tigorlazuardi/ridit-go/app/config"
 	"github.com/tigorlazuardi/ridit-go/app/config/models"
 )
@@ -26,7 +27,7 @@ var enableAspectRatio = &cobra.Command{
 	Short:   "enable image aspect ratio check",
 	Example: "ridit config aspect_ratio enable",
 	Run: func(cmd *cobra.Command, args []string) {
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err := config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Enabled = true
 		})
@@ -42,7 +43,7 @@ var disableAspectRatio = &cobra.Command{
 	Short:   "disable image aspect ratio check",
 	Example: "ridit config aspect_ratio disable",
 	Run: func(cmd *cobra.Command, args []string) {
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err := config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Enabled = false
 		})
@@ -66,7 +67,7 @@ var setAspectRatioHeight = &cobra.Command{
 		if err != nil {
 			entry.Fatal("failed to parse value to positive integer value")
 		}
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err = config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Height = float32(val)
 		})
@@ -91,7 +92,7 @@ var setAspectRatioWidth = &cobra.Command{
 		if err != nil {
 			entry.Fatal("failed to parse value to positive integer value")
 		}
-		profile, _ := cmd.PersistentFlags().GetString("profile")
+		profile := viper.GetString("profile")
 		err = config.Modify(profile, func(c *models.Config) {
 			c.AspectRatio.Width = float32(val)
 		})

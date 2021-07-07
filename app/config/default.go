@@ -63,6 +63,9 @@ func GetConfigFilePath(profile string) string {
 
 // Write default config file if config not found. Never ignore the returned value. Make sure to close the file.
 func LoadConfigFile(profile string) (*os.File, bool, error) {
+	if profile == "" {
+		logrus.Panic("empty profile")
+	}
 	loc := GetConfigFilePath(profile)
 	f, err := os.Open(loc)
 	if err != nil {
