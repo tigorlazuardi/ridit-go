@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/tigorlazuardi/ridit-go/app/config/models/sort"
+	"github.com/tigorlazuardi/ridit/app/config/models/sort"
 )
 
 type Config struct {

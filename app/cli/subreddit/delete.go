@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tigorlazuardi/ridit-go/app/config"
-	"github.com/tigorlazuardi/ridit-go/app/config/models"
-	"github.com/tigorlazuardi/ridit-go/pkg"
+	"github.com/tigorlazuardi/ridit/app/config"
+	"github.com/tigorlazuardi/ridit/app/config/models"
+	"github.com/tigorlazuardi/ridit/pkg"
 )
 
 var deleteSubreddit = &cobra.Command{

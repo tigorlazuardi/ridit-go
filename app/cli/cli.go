@@ -11,11 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tigorlazuardi/ridit-go/app/cli/config"
-	"github.com/tigorlazuardi/ridit-go/app/cli/subreddit"
-	configapi "github.com/tigorlazuardi/ridit-go/app/config"
-	"github.com/tigorlazuardi/ridit-go/app/reddit"
-	"github.com/tigorlazuardi/ridit-go/pkg"
+	"github.com/tigorlazuardi/ridit/app/cli/config"
+	"github.com/tigorlazuardi/ridit/app/cli/subreddit"
+	configapi "github.com/tigorlazuardi/ridit/app/config"
+	"github.com/tigorlazuardi/ridit/app/reddit"
+	"github.com/tigorlazuardi/ridit/pkg"
 )
 
 var rootCmd = &cobra.Command{

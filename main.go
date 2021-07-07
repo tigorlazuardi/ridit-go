@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/tigorlazuardi/ridit-go/app"
+	"github.com/tigorlazuardi/ridit/app"
 )
 
 func main() {

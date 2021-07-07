@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 
 	"github.com/pelletier/go-toml"
-	"github.com/tigorlazuardi/ridit-go/app/config/models"
+	"github.com/tigorlazuardi/ridit/app/config/models"
 )
 
 func Modify(profile string, f func(*models.Config)) error {

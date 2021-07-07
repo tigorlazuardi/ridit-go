@@ -9,8 +9,8 @@ import (
 	"github.com/kirsle/configdir"
 	"github.com/pelletier/go-toml"
 	"github.com/sirupsen/logrus"
-	"github.com/tigorlazuardi/ridit-go/app/config/models"
-	"github.com/tigorlazuardi/ridit-go/app/config/models/sort"
+	"github.com/tigorlazuardi/ridit/app/config/models"
+	"github.com/tigorlazuardi/ridit/app/config/models/sort"
 )
 
 func defaultConfigValue(profile string) models.Config {

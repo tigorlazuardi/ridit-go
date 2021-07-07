@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/tigorlazuardi/ridit-go/app/config"
-	"github.com/tigorlazuardi/ridit-go/app/config/models"
+	"github.com/tigorlazuardi/ridit/app/config"
+	"github.com/tigorlazuardi/ridit/app/config/models"
 )
 
 var aspectRatioCmd = &cobra.Command{

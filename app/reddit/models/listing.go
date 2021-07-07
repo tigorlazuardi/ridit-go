@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
+	confmodel "github.com/tigorlazuardi/ridit/app/config/models"
 )
 
 type Listing struct {

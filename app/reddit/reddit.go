@@ -15,9 +15,9 @@ import (
 	"github.com/gookit/color"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	confmodel "github.com/tigorlazuardi/ridit-go/app/config/models"
-	"github.com/tigorlazuardi/ridit-go/app/reddit/models"
-	"github.com/tigorlazuardi/ridit-go/pkg"
+	confmodel "github.com/tigorlazuardi/ridit/app/config/models"
+	"github.com/tigorlazuardi/ridit/app/reddit/models"
+	"github.com/tigorlazuardi/ridit/pkg"
 	"github.com/vbauerster/mpb/v7"
 	"github.com/vbauerster/mpb/v7/decor"
 )

@@ -1,4 +1,4 @@
-module github.com/tigorlazuardi/ridit-go
+module github.com/tigorlazuardi/ridit
 
 go 1.16
 
