@@ -186,10 +186,14 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 
 		return nil
 	}, retry.Attempts(3), retry.OnRetry(func(n uint, err error) {
-		entry.WithError(err).WithField("attempt", n).Error("failed downloading image. retrying...")
+		if !isTerminal() {
+			entry.WithError(err).WithField("attempt", n).Error("failed downloading image. retrying...")
+		}
 	}))
 	if err != nil {
-		entry.WithError(err).Error("remove fail download")
+		if !isTerminal() {
+			entry.WithError(err).Error("remove fail download")
+		}
 		errRemove := os.Remove(path)
 		if errRemove != nil {
 			entry.WithError(errRemove).Debug("failed to remove")
