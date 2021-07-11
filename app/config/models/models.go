@@ -49,6 +49,7 @@ func (ar AspectRatio) Passed(height, width uint) bool {
 	imageAr := float32(width) / float32(height)
 	minRatio := configAr - ar.Range
 	maxRatio := configAr + ar.Range
+
 	return imageAr >= minRatio && imageAr <= maxRatio
 }
 

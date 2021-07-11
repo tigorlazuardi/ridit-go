@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/tigorlazuardi/ridit/pkg"
 )
 
 var daemonCMD = &cobra.Command{
@@ -11,6 +12,8 @@ var daemonCMD = &cobra.Command{
 	Long:    "runs ridit as daemon http service",
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
+		entry := pkg.EntryFromContext(cmd.Context())
+		entry.Fatal("not implemented")
 	},
 }
 
