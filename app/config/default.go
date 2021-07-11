@@ -20,7 +20,7 @@ func defaultConfigValue(profile string) models.Config {
 		Download: models.Download{
 			Path:           path,
 			ConnectTimeout: models.Duration{Duration: time.Second * 5},
-			Timeout:        models.Duration{Duration: time.Second * 30},
+			Timeout:        models.Duration{Duration: time.Minute * 2},
 		},
 		AspectRatio: models.AspectRatio{
 			Enabled: true,
