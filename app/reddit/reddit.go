@@ -58,6 +58,11 @@ func (r Repository) Fetch(ctx context.Context) <-chan DownloadChan {
 		wg := sync.WaitGroup{}
 		for subreddit, subconf := range r.config.Subreddits {
 			wg.Add(1)
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
 			go func(ctx context.Context, subreddit string, subconf confmodel.Subreddit) {
 				defer wg.Done()
 				ctx = pkg.ContextEntryWithFields(ctx, logrus.Fields{
@@ -85,6 +90,11 @@ func (r Repository) downloadImages(ctx context.Context, lc <-chan ListingChan) <
 		entry := pkg.EntryFromContext(ctx)
 		wg := sync.WaitGroup{}
 		for listing := range lc {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
 			if listing.Err != nil {
 				entry.WithError(listing.Err).Error(listing.Err)
 				continue
@@ -94,6 +104,11 @@ func (r Repository) downloadImages(ctx context.Context, lc <-chan ListingChan) <
 				defer wg.Done()
 				wgg := &sync.WaitGroup{}
 				for _, meta := range listing.Downloads {
+					select {
+					case <-ctx.Done():
+						return
+					default:
+					}
 					wgg.Add(1)
 					r.sem <- struct{}{}
 					go func(ctx context.Context, meta models.DownloadMeta) {
@@ -120,6 +135,11 @@ func (r Repository) downloadImages(ctx context.Context, lc <-chan ListingChan) <
 }
 
 func (r Repository) download(ctx context.Context, meta models.DownloadMeta) error {
+	select {
+	case <-ctx.Done():
+		return errors.New("download canceled")
+	default:
+	}
 	dir := filepath.Join(r.config.Download.Path, r.config.Profile, meta.SubredditName)
 	_ = os.MkdirAll(dir, 0777)
 	path := filepath.Join(dir, meta.Filename)
@@ -180,7 +200,7 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 				decor.Name(job, decor.WC{W: 28, C: decor.DidentRight}),
 				decor.OnComplete(decor.Name(downloading, decor.WC{W: 11, C: decor.DidentRight}), done),
 			)
-			if i > 0 {
+			if i >= 1 {
 				leftDecor = mpb.PrependDecorators(
 					decor.Name("["+meta.SubredditName+"]", decor.WC{W: 23, C: decor.DidentRight}),
 					decor.Name(job, decor.WC{W: 28, C: decor.DidentRight}),
@@ -204,6 +224,12 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 		}
 		_, err = io.Copy(file, reader)
 		file.Close()
+		if err == context.Canceled {
+			return retry.Unrecoverable(errors.New("download canceled"))
+		}
+		if err == context.DeadlineExceeded {
+			return errors.New("download timeout")
+		}
 		if err != nil {
 			return err
 		}
@@ -240,7 +266,7 @@ func (r Repository) downloadListing(ctx context.Context, subreddit string, subco
 	var resp *http.Response
 	select {
 	case <-ctx.Done():
-		logrus.Panic("masuuuk")
+		return nil, errors.New("download canceled")
 	default:
 	}
 	err := retry.Do(func() error {

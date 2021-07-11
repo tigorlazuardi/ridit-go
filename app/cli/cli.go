@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/ahmetalpbalkan/go-cursor"
 	"github.com/kirsle/configdir"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -23,12 +24,15 @@ var rootCmd = &cobra.Command{
 	Short: "reddit image downloader",
 	Long:  "A CLI program to download images from reddit",
 	Run: func(cmd *cobra.Command, args []string) {
+		cursor.Hide()
 		defer func() {
+			cursor.Show()
 			if pkg.IsTerminal() {
 				time.Sleep(100 * time.Millisecond)
 			}
 		}()
 		ctx := cmd.Context()
+		ctx = pkg.ContextWithCtrlC(ctx)
 		entry := pkg.EntryFromContext(ctx)
 		profile := viper.GetString("profile")
 		config, err := configapi.Load(profile)
