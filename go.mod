@@ -3,7 +3,7 @@ module github.com/tigorlazuardi/ridit
 go 1.16
 
 require (
-	github.com/ahmetalpbalkan/go-cursor v0.0.0-20131010032410-8136607ea412 // indirect
+	github.com/ahmetalpbalkan/go-cursor v0.0.0-20131010032410-8136607ea412
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/gookit/color v1.4.2
 	github.com/joho/godotenv v1.3.0
