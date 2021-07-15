@@ -101,9 +101,8 @@ func initConfigurations() {
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to create config file")
 	}
-	defer file.Close()
-
 	if created {
+		file.Close()
 		logrus.WithField("location", viper.GetString("configfile")).Info("config file created")
 		os.Exit(0)
 	}
@@ -111,6 +110,8 @@ func initConfigurations() {
 	viper.SetConfigType("toml")
 	err = viper.ReadConfig(file)
 	if err != nil {
+		file.Close()
 		logrus.WithError(err).Fatal("failed to read config file")
 	}
+	file.Close()
 }

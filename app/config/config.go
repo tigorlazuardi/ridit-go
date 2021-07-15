@@ -7,6 +7,7 @@ import (
 	"github.com/tigorlazuardi/ridit/app/config/models"
 )
 
+//nolint:gosec
 func Modify(profile string, f func(*models.Config)) error {
 	config, err := Load(profile)
 	if err != nil {
@@ -15,7 +16,7 @@ func Modify(profile string, f func(*models.Config)) error {
 	f(&config)
 	val, _ := toml.Marshal(config)
 	path := GetConfigFilePath(profile)
-	return ioutil.WriteFile(path, val, 0777)
+	return ioutil.WriteFile(path, val, 0644)
 }
 
 func Load(profile string) (config models.Config, err error) {

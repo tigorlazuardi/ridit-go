@@ -11,7 +11,7 @@ import (
 
 var ErrNotSupported = errors.New("unsupported output format")
 
-// Valid values: json, toml, yaml
+// Valid values: json, toml, yaml.
 func FormatConfig(profile, format string) (val []byte, err error) {
 	config, err := Load(profile)
 	if err != nil {

@@ -17,16 +17,8 @@ const (
 
 func Parse(s string) (Sort, error) {
 	switch strings.ToLower(s) {
-	case "new":
-		return New, nil
-	case "hot":
-		return Hot, nil
-	case "rising":
-		return Rising, nil
-	case "controversial":
-		return Controversial, nil
-	case "top":
-		return Top, nil
+	case "new", "hot", "rising", "controversial", "top":
+		return Sort(s), nil
 	default:
 		return New, errors.New("failed to parse sorting value")
 	}
@@ -37,27 +29,12 @@ func ParseDefault(s string) Sort {
 	return sort
 }
 
-func (s Sort) String() string {
-	switch s {
-	case Hot:
-		return "hot"
-	case Rising:
-		return "rising"
-	case Top:
-		return "Top"
-	case Controversial:
-		return "controversial"
-	default:
-		return "new"
-	}
-}
-
 func (s Sort) MarshalText() ([]byte, error) {
-	return []byte(s.String()), nil
+	return []byte(s), nil
 }
 
 func (s Sort) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + s.String() + `"`), nil
+	return []byte(`"` + s + `"`), nil
 }
 
 func (s *Sort) UnmarshalJSON(b []byte) error {

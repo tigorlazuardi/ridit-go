@@ -29,8 +29,7 @@ type Repository struct {
 	sem    chan struct{}
 }
 
-type RepositoryError struct {
-}
+type RepositoryError struct{}
 
 type ListingChan struct {
 	Downloads []models.DownloadMeta
@@ -182,7 +181,7 @@ func (r Repository) download(ctx context.Context, meta models.DownloadMeta) erro
 			return retry.Unrecoverable(err)
 		}
 
-		var reader = res.Body
+		reader := res.Body
 		// cut the https://
 		if pkg.IsTerminal() {
 			job := meta.URL[8:]
@@ -318,7 +317,7 @@ type Check struct {
 	Err   error
 }
 
-// Creates client if Doer is nil
+// Creates client if Doer is nil.
 func CheckSubredditExist(client pkg.Doer, ctx context.Context, subreddits []string) <-chan Check {
 	cc := make(chan Check)
 	go func() {
