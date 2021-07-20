@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 	Use:   "ridit",
 	Short: "reddit image downloader",
 	Long:  "A CLI program to download images from reddit",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cmd *cobra.Command, _ []string) {
 		cursor.Hide()
 		defer func() {
 			cursor.Show()
@@ -32,7 +32,8 @@ var rootCmd = &cobra.Command{
 			}
 		}()
 		ctx := cmd.Context()
-		ctx = pkg.ContextWithCtrlC(ctx)
+		sig := pkg.RegisterInterrupt()
+		ctx = pkg.ContextWithInterrupt(ctx, sig)
 		entry := pkg.EntryFromContext(ctx)
 		profile := viper.GetString("profile")
 		config, err := configapi.Load(profile)

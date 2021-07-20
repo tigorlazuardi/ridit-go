@@ -7,15 +7,18 @@ import (
 	"syscall"
 )
 
-func ContextWithCtrlC(ctx context.Context) context.Context {
-	ctx, stop := context.WithCancel(ctx)
+func RegisterInterrupt() <-chan os.Signal {
+	sig := make(chan os.Signal, 3)
+	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	return sig
+}
+
+func ContextWithInterrupt(ctx context.Context, sig <-chan os.Signal) context.Context {
+	ctx, release := context.WithCancel(ctx)
 
 	go func() {
-		sig := make(chan os.Signal)
-		signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
 		<-sig
-		stop()
+		release()
 	}()
 
 	return ctx
