@@ -26,6 +26,10 @@ func Start(router http.Handler, port string) CloserFunc {
 	return func() error {
 		ctx, release := context.WithTimeout(context.Background(), time.Second*5)
 		defer release()
-		return server.Shutdown(ctx)
+		err := server.Shutdown(ctx)
+		if errors.Is(err, context.DeadlineExceeded) {
+			err = errors.New("server shutdown timeout")
+		}
+		return err
 	}
 }
