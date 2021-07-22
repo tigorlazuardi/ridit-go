@@ -20,7 +20,7 @@ var daemonCMD = &cobra.Command{
 
 		router := router.New()
 
-		// TODO: move this 10101 to config port
+		// TODO [$60f9a89c8d9a8a0009eea9d6]: move this 10101 to config port
 		close := server.Start(router, ":10101")
 		log.Println("http server running on :10101")
 		<-sig
